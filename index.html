@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Personal Finance Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Voice Interface -->
+    <div class="voice-interface">
+        <button id="voiceButton" class="voice-btn" title="Voice Commands">
+            <div class="voice-icon">🎤</div>
+            <div class="voice-wave hidden"></div>
+        </button>
+        <div class="voice-status" id="voiceStatus">Ready</div>
+    </div>
+
+    <!-- Voice Command Panel -->
+    <div id="voiceHelpPanel" class="voice-help-panel hidden">
+        <div class="voice-help-header">
+            <h3>Voice Commands</h3>
+            <button class="voice-help-close" id="closeVoiceHelp">&times;</button>
+        </div>
+        <div class="voice-help-content">
+            <div class="voice-command-section">
+                <h4>Transaction Commands</h4>
+                <ul>
+                    <li>"Add income 50000 from salary for monthly salary"</li>
+                    <li>"Add expense 500 for food lunch"</li>
+                    <li>"Show my balance"</li>
+                    <li>"What are my expenses?"</li>
+                    <li>"Delete last transaction"</li>
+                </ul>
+            </div>
+            <div class="voice-command-section">
+                <h4>Budget Commands</h4>
+                <ul>
+                    <li>"Set budget 20000 for food"</li>
+                    <li>"Show my budgets"</li>
+                    <li>"How much did I spend on food?"</li>
+                </ul>
+            </div>
+            <div class="voice-command-section">
+                <h4>Navigation Commands</h4>
+                <ul>
+                    <li>"Go to dashboard"</li>
+                    <li>"Show transactions"</li>
+                    <li>"Open analytics"</li>
+                    <li>"Show budget"</li>
+                </ul>
+            </div>
+            <div class="voice-command-section">
+                <h4>AI Assistant Commands</h4>
+                <ul>
+                    <li>"Give me financial advice"</li>
+                    <li>"How can I save money?"</li>
+                    <li>"Show monthly report"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Transcript Display -->
+    <div id="voiceTranscript" class="voice-transcript hidden">
+        <div class="transcript-header">
+            <span>Listening...</span>
+            <button id="stopVoiceBtn" class="btn btn--sm btn--outline">Stop</button>
+        </div>
+        <div class="transcript-text" id="transcriptText">Say something...</div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="btn btn--outline">🌙</button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-container">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>💰 AI Finance Manager</h2>
+                <button id="voiceHelpBtn" class="voice-help-btn" title="Voice Help">
+                    <span>🎤</span> Help
+                </button>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-link active" data-tab="dashboard">Dashboard</button>
+                <button class="nav-link" data-tab="transactions">Transactions</button>
+                <button class="nav-link" data-tab="budget">Budget</button>
+                <button class="nav-link" data-tab="analytics">Analytics</button>
+                <button class="nav-link" data-tab="ai-chat">AI Assistant</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container main-content">
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <!-- Balance Cards -->
+                <div class="card balance-card">
+                    <div class="card__body">
+                        <h3>Current Balance</h3>
+                        <div class="balance-amount" id="currentBalance">₹0</div>
+                    </div>
+                </div>
+                
+                <div class="card income-card">
+                    <div class="card__body">
+                        <h3>Monthly Income</h3>
+                        <div class="amount positive" id="monthlyIncome">₹0</div>
+                    </div>
+                </div>
+                
+                <div class="card expense-card">
+                    <div class="card__body">
+                        <h3>Monthly Expenses</h3>
+                        <div class="amount negative" id="monthlyExpenses">₹0</div>
+                    </div>
+                </div>
+                
+                <div class="card savings-card">
+                    <div class="card__body">
+                        <h3>Net Savings</h3>
+                        <div class="amount" id="netSavings">₹0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card__header">
+                    <h3>Quick Actions</h3>
+                    <div class="voice-tip">
+                        💡 Try saying: "Add expense 500 for food lunch"
+                    </div>
+                </div>
+                <div class="card__body">
+                    <div class="quick-actions">
+                        <button class="btn btn--primary" id="addIncomeBtn">+ Add Income</button>
+                        <button class="btn btn--secondary" id="addExpenseBtn">+ Add Expense</button>
+                        <button class="btn btn--outline" id="setBudgetBtn">Set Budget</button>
+                        <button class="btn btn--outline" id="exportDataBtn">Export Data</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions & AI Insights -->
+            <div class="dashboard-bottom">
+                <div class="card recent-transactions">
+                    <div class="card__header">
+                        <h3>Recent Transactions</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="recentTransactionsList"></div>
+                    </div>
+                </div>
+                
+                <div class="card ai-insights">
+                    <div class="card__header">
+                        <h3>AI Insights</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="aiInsightsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Tab -->
+        <div id="transactions" class="tab-content">
+            <div class="card">
+                <div class="card__header">
+                    <h3>Transaction Management</h3>
+                    <div class="transaction-filters">
+                        <select id="typeFilter" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                        <select id="categoryFilter" class="form-control">
+                            <option value="">All Categories</option>
+                        </select>
+                        <input type="text" id="searchFilter" class="form-control" placeholder="Search transactions...">
+                    </div>
+                </div>
+                <div class="card__body">
+                    <div class="table-container">
+                        <table class="transactions-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Tab -->
+        <div id="budget" class="tab-content">
+            <div class="card">
+                <div class="card__header">
+                    <h3>Budget Management</h3>
+                    <div class="budget-voice-tip">
+                        💡 Say: "Set budget 20000 for food"
+                    </div>
+                    <button class="btn btn--primary" id="addBudgetBtn">+ Add Budget</button>
+                </div>
+                <div class="card__body">
+                    <div id="budgetList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="analytics-grid">
+                <div class="card chart-card">
+                    <div class="card__header">
+                        <h3>Expense Categories</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="expensePieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card chart-card">
+                    <div class="card__header">
+                        <h3>Income vs Expenses</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="incomeExpenseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card spending-insights">
+                    <div class="card__header">
+                        <h3>Spending Insights</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="spendingInsights"></div>
+                    </div>
+                </div>
+                
+                <div class="card financial-health">
+                    <div class="card__header">
+                        <h3>Financial Health Score</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="health-score">
+                            <div class="score-circle" id="healthScore">85</div>
+                            <div class="score-label">Good</div>
+                        </div>
+                        <div id="healthTips"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat Tab -->
+        <div id="ai-chat" class="tab-content">
+            <div class="card">
+                <div class="card__header">
+                    <h3>AI Financial Assistant</h3>
+                    <div class="chat-voice-tip">
+                        💡 Say: "Give me financial advice"
+                    </div>
+                </div>
+                <div class="card__body">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="ai-message">
+                                <div class="message-content">
+                                    Hello! I'm your AI Financial Assistant. Ask me about your spending, budget, savings, or any financial advice. Try keywords like "spending", "budget", "save", "investment", etc. You can also use voice commands!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chatInput" class="form-control" placeholder="Ask me about your finances...">
+                            <button class="btn btn--primary" id="sendChatBtn">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="transactionModalTitle">Add Transaction</h3>
+                <button class="modal-close" id="closeTransactionModal">&times;</button>
+            </div>
+            <form id="transactionForm">
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select id="transactionType" class="form-control" required>
+                        <option value="">Select Type</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (₹)</label>
+                    <input type="number" id="transactionAmount" class="form-control" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="transactionCategory" class="form-control" required>
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" id="transactionDescription" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" id="transactionDate" class="form-control" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--secondary" id="cancelTransactionBtn">Cancel</button>
+                    <button type="submit" class="btn btn--primary">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Modal -->
+    <div id="budgetModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set Budget</h3>
+                <button class="modal-close" id="closeBudgetModal">&times;</button>
+            </div>
+            <form id="budgetForm">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="budgetCategory" class="form-control" required>
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Monthly Limit (₹)</label>
+                    <input type="number" id="budgetLimit" class="form-control" required min="0" step="0.01">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--secondary" id="cancelBudgetBtn">Cancel</button>
+                    <button type="submit" class="btn btn--primary">Save Budget</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-text">Created by <span class="footer-highlight">Parth Maru</span></p>
+                <div class="footer-links">
+                    <span class="footer-version">v2.0 - Voice Enabled</span>
+                    <span class="footer-separator">•</span>
+                    <span class="footer-year">2025</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
